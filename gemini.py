@@ -19,8 +19,8 @@ os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = path_to_service_account_key_file
 # Set up the model
 generation_config = {
     'temperature': 0.9,
-    'top_p': 1,
-    'top_k': 1,
+    'top_p': 40,
+    'top_k': 40,
     'max_output_tokens': 2048,
     'stop_sequences': [],
 }
