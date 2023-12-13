@@ -13,7 +13,7 @@ pip install PyQt5
 pip install opencv-python
 pip install python-dotenv
 pip install google-generativeai
-pip install ai-generativelanguage-v1beta
+pip install google-ai-generativelanguage
 ```
 
 ## Settings
@@ -25,3 +25,10 @@ API_KEY=[Redacted]
 GOOGLE_APPLICATION_CREDENTIALS=C:\Development\FreeLance\GoogleSamples\Credentials\gemini.json
 ```
 
+## error 
+
+If you see the following error try running a vpn.
+
+>400 User location is not supported for the API use.
+
+ 
