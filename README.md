@@ -6,7 +6,15 @@ This sample will read from your webcam you can type requests to the ai model in 
 
 ## Required
 
-TODO: add this after the pip has been released.
+TODO: update after the beta library has been released as a pip.
+
+```
+pip install PyQt5
+pip install opencv-python
+pip install python-dotenv
+pip install C:\Development\FreeLance\Gemini\BetaLibs\google-generativeai.tar.gz
+pip install C:\Development\FreeLance\Gemini\BetaLibs\ai-generativelanguage-v1beta-py.tar.gz
+```
 
 ## Settings
 

@@ -7,12 +7,6 @@ from gemini import sample_generate_text_image_content
 import asyncio
 from qasync import QEventLoop, asyncSlot
 
-# pip install PyQt5
-# pip install opencv-python
-# pip install python-dotenv
-# pip install C:\Development\FreeLance\Gemini\BetaLibs\google-generativeai.tar.gz
-# pip install C:\Development\FreeLance\Gemini\BetaLibs\ai-generativelanguage-v1beta-py.tar.gz
-
 cap = cv2.VideoCapture(0)  # 0 refers to the default webcam
 
 
