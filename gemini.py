@@ -1,4 +1,5 @@
 from google.ai import generativelanguage_v1beta
+from gemini_chat import build_conversation_turn, get_conversation
 import asyncio
 from pathlib import Path
 import google.api_core
@@ -99,14 +100,40 @@ async def main_text(text):
 
 
 async def main_chat():
-    # For testing images chat
-    lines = []
-    while True:
-        user_input = input(": ")  # Prompt the user
-        lines.append(user_input)
-        data = await main_text(lines)
-        lines.append(data)
-        print(data)
+    try:
+        # storing conversation data.
+        conversation_history = []
+
+        print("Test application for sending chat messages to Gemini ai.  To exit type Exit")
+        print("To exit type Exit")
+
+        while True:
+            # Prompt the user to type something
+            user_input = input(": ")
+
+            # get conversation history
+            convo = get_conversation(conversation_history)
+
+            # send message with conversation history
+            convo.send_message(user_input)
+
+            if user_input.lower().strip() == "exit":
+                print("Application shutting down.")
+                break
+
+            # This is for debugging the conversation history.  (Linda)
+            if user_input.lower().strip() == "show history":
+                print(conversation_history)
+            else:
+                # store user message as history
+                conversation_history.append(build_conversation_turn("user", user_input))
+
+                # store model response
+                conversation_history.append(build_conversation_turn("model", convo.last.text))
+                print(convo.last.text)
+
+    except KeyboardInterrupt:
+        print("Application shutting down. ")
 
 
 # For testing text based chat.
