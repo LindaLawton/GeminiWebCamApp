@@ -1,0 +1,82 @@
+[
+  {
+    "text_input": "[USA][Summer] I like chocolate candy.",
+    "output": "Chocolate bar, Chocolate truffles, Chocolate mousse"
+  },
+  {
+    "text_input": "[USA][Summer] I like sour candy.",
+    "output": "Sour gummy worms, Sour Patch Kids, Warheads"
+  },
+  {
+    "text_input": "[USA][Summer] I like fruity candy.",
+    "output": "Starburst, Skittles, Sour gummy worms"
+  },
+  {
+    "text_input": "[USA][Summer] I like chewy candy.",
+    "output": "Gummy bears, Starbursts, Laffy Taffy"
+  },
+  {
+    "text_input": "[USA][Summer] I like hard candy.",
+    "output": "Lollipops, Lifesavers, Jolly Ranchers"
+  },
+  {
+    "text_input": "[USA][Winter] I like chocolate candy.",
+    "output": "Chocolate bar, Chocolate truffles, Peppermint bark"
+  },
+  {
+    "text_input": "[USA][Winter] I like sour candy.",
+    "output": "Candy canes, Sour gummy worms, Warheads"
+  },
+  {
+    "text_input": "[USA][Winter] I like fruity candy.",
+    "output": "Hard candy canes, Candy corn, M&M's"
+  },
+  {
+    "text_input": "[USA][Winter] I like chewy candy.",
+    "output": "Peppermint bark, Gingerbread men, Soft caramels"
+  },
+  {
+    "text_input": "[USA][Winter] I like hard candy.",
+    "output": "Lollipops, Christmas hard candies, Lifesavers"
+  },
+  {
+    "text_input": "[Denmark][Summer] I like liquorice candy.",
+    "output": "Salmiak liquorice, Black licorice, Chewy licorice"
+  },
+  {
+    "text_input": "[Denmark][Summer] I like chocolate candy.",
+    "output": "Milk chocolate, Dark chocolate, White chocolate"
+  },
+  {
+    "text_input": "[Denmark][Summer] I like fruity candy.",
+    "output": "Fruit chews, Fruit gums, Hard fruit candies"
+  },
+  {
+    "text_input": "[Denmark][Summer] I like chewy candy.",
+    "output": "Gummy bears, Jelly beans, Soft caramels"
+  },
+  {
+    "text_input": "[Denmark][Summer] I like hard candy.",
+    "output": "Lollipops, Peppermints, Lifesavers"
+  },
+  {
+    "text_input": "[Denmark][Winter] I like liquorice candy.",
+    "output": "Salmiak liquorice, Black licorice, Hard licorice"
+  },
+  {
+    "text_input": "[Denmark][Winter] I like chocolate candy.",
+    "output": "Milk chocolate, Dark chocolate, White chocolate"
+  },
+  {
+    "text_input": "[Denmark][Winter] I like fruity candy.",
+    "output": "Christmas hard candies, Christmas fruit cake, Fruit chews"
+  },
+  {
+    "text_input": "[Denmark][Winter] I like chewy candy.",
+    "output": "Soft caramels, Jelly beans, Peppermint bark"
+  },
+  {
+    "text_input": "[Denmark][Winter] I like hard candy.",
+    "output": "Lollipops, Hard fruit candies, Lifesavers"
+  }
+]

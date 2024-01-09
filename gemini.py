@@ -1,34 +1,13 @@
-import google.generativeai as genai
 from google.ai import generativelanguage_v1beta
-from dotenv import load_dotenv
-import os
-import requests
 import asyncio
 from pathlib import Path
+import google.api_core
+import gemini_util
 
-load_dotenv()
 
-# The api key for accessing the api. stored in .env
-api_key = os.getenv("API_KEY")
-path_to_service_account_key_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-genai.configure(api_key=api_key)
-
-# Set the environment variable
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = path_to_service_account_key_file
-
-# Set up the model
-generation_config = {
-    'temperature': 0.9,
-    'top_p': 1,
-    'top_k': 40,
-    'max_output_tokens': 2048,
-    'stop_sequences': [],
-}
-
-safety_settings = [{"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-                   {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-                   {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-                   {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"}]
+def read_prompt():
+    with open("prompt.txt", "r") as file:
+        return file.read()
 
 
 async def sample_generate_text_image_content(text, image):
@@ -43,17 +22,11 @@ async def sample_generate_text_image_content(text, image):
     # Create a client
     client = generativelanguage_v1beta.GenerativeServiceAsyncClient()
 
-    image_blob = generativelanguage_v1beta.Blob(mime_type="image/jpeg", data=image)
-    text_part = generativelanguage_v1beta.Part(text=text)
-    image_part = generativelanguage_v1beta.Part(inline_data=image_blob)
-    contents = generativelanguage_v1beta.Content(parts=[image_part, text_part], role="user")
-
-    # Initialize request argument(s)
     request = generativelanguage_v1beta.GenerateContentRequest(
-        model="models/gemini-pro-vision",
-        contents=[contents],
-        generation_config=generation_config,
-        safety_settings=safety_settings
+        model=gemini_util.IMAGE_MODEL_NAME,
+        contents=[gemini_util.build_content("user", image, f'{read_prompt} {text}')],
+        generation_config=gemini_util.generation_config,
+        safety_settings=gemini_util.safety_settings
     )
 
     # Make the request
@@ -63,58 +36,83 @@ async def sample_generate_text_image_content(text, image):
     return response.candidates[0].content.parts[0].text
 
 
-async def sample_generate_text_content(text):
+async def sample_generate_text_content(text_list):
     """
         This function sends a text reqeust to gemini.
 
+        :param text_list:
         :param text: The text prompt from the user.
         :return: The response from gemini
         """
     # Create a client
     client = generativelanguage_v1beta.GenerativeServiceAsyncClient()
-    text_part = generativelanguage_v1beta.Part(text=text)
-    contents = generativelanguage_v1beta.Content(parts=[text_part], role="user")
 
-    # Initialize request argument(s)
-    request = generativelanguage_v1beta.GenerateContentRequest(
-        model="models/gemini-pro",
-        contents=[contents],
-        generation_config=generation_config,
-        safety_settings=safety_settings
-    )
+    contents = []
+    for text in text_list:
+        role = "user"
+        if text.find("Gemini: ") != -1:
+            text = text.replace("Gemini: ", "")
+            role = "model"
+        contents.append(gemini_util.build_content_text(role, text))
 
-    # Make the request
-    response = await client.generate_content(request=request)
+    # for obj in contents:
+    #    print({"parts": obj.parts, "role": obj.role})
 
-    # Handle the response
-    return response.candidates[0].content.parts[0].text
+    try:
+        # Initialize request argument(s)
+        request = generativelanguage_v1beta.GenerateContentRequest(
+            model=gemini_util.TEXT_MODEL_NAME,
+            contents=contents,
+            generation_config=gemini_util.generation_config,
+            safety_settings=gemini_util.safety_settings
+        )
+
+        # Make the request
+        response = await client.generate_content(request=request)
+
+        # Handle the response
+        return response.candidates[0].content.parts[0].text
+    except google.api_core.exceptions.FailedPrecondition as e:
+        # print('Failed precondition error:', e)
+        return f'Error: {e}  Tip: use a VPN.'
+    except Exception as e:
+        # print('Unknown error:', e)
+        return f'Error: {e}'
 
 
 async def main():
     # Gemini provides a multimodal model (gemini-pro-vision) that accepts both text and images and inputs. The
     # GenerativeModel.generate_content API is designed handle multi-media prompts and returns a text output.
 
-    # downloading an image to test with
-    if not os.path.exists("image.jpg"):
-        image_url = "https://storage.googleapis.com/generativeai-downloads/images/scones.jpg"
-        response = requests.get(image_url)
-        if response.status_code == 200:
-            print("Image downloaded successfully")
-
-            with open("image.jpg", "wb") as f:
-                f.write(response.content)
-        else:
-            print("Error downloading image:", response.status_code)
-
     image_bites = Path("image.jpg").read_bytes()
-    response = await sample_generate_text_image_content('What do you see?', image_bites)
+    response = await sample_generate_text_image_content('What do you see?', [image_bites])
     print(f'Text Image response: {response}')
 
-    response = await sample_generate_text_content("Who is ames T. Kirk?")
+    # for testing text based calls.
+    response = await sample_generate_text_content(["Who is james T. Kirk?"])
     print(f'Text response: {response}')
 
 
-# Just for testing
+async def main_text(text):
+    response = await sample_generate_text_content(text)
+    return f'Gemini: {response}'
 
+
+async def main_chat():
+    # For testing images chat
+    lines = []
+    while True:
+        user_input = input(": ")  # Prompt the user
+        lines.append(user_input)
+        data = await main_text(lines)
+        lines.append(data)
+        print(data)
+
+
+# For testing text based chat.
 if __name__ == "__main__":
-    asyncio.run(main())
+    # test text based and image.
+    # asyncio.run(main())
+
+    # test chat
+    asyncio.run(main_chat())

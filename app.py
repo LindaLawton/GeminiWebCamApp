@@ -3,7 +3,7 @@ import cv2
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from gemini import sample_generate_text_image_content
+from gemini import sample_generate_text_image_content, sample_generate_text_content
 import asyncio
 from qasync import QEventLoop, asyncSlot
 
@@ -19,8 +19,9 @@ class MainWindow(QWidget):
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_webcam_feed)
         self.timer.start(50)  # Update the webcam feed every 50 milliseconds
-
         self.loop = loop or asyncio.get_event_loop()
+        self.screen_data = []
+        self.previous_screen = ""
 
     def initUI(self):
         hbox = QHBoxLayout(self)
@@ -40,13 +41,14 @@ class MainWindow(QWidget):
         self.textedit.setFontPointSize(16)
         # Create a button
         button = QPushButton("Send", self)
+        button2 = QPushButton("Text", self)
 
         splitter2 = QSplitter(Qt.Vertical)
         splitter2.addWidget(self.textedit)
         splitter2.addWidget(button)
+        splitter2.addWidget(button2)
 
         splitter1 = QSplitter(Qt.Horizontal)
-
         splitter1.addWidget(webcam_frame)
         splitter1.addWidget(splitter2)
         splitter1.setSizes([400, 400])
@@ -62,7 +64,44 @@ class MainWindow(QWidget):
         # Connect button click event to a function
         button.clicked.connect(self.capture_image_async)
 
+        # Connect button click event to a function
+        button2.clicked.connect(self.capture_text_async)
+
         # self.show()
+
+
+
+
+    @asyncSlot()
+    async def capture_text_async(self):
+
+        # Read the text from the textedit
+        text = self.textedit.toPlainText()
+
+        # Replace everything from the previous screen with space to find what was changed.
+        new_text = text.replace(self.previous_screen, "")
+        print(new_text)
+
+        # add this to the lines of data to send chatbot.
+        self.screen_data.append(new_text)
+
+        # send chat history to gemini
+        response = await sample_generate_text_content(self.screen_data)
+
+        format_response = f"\n\nGemini: {response}\n"
+        # format response
+        self.textedit.append(format_response)
+
+        # Add response as screen data.
+        self.screen_data.append(format_response)
+
+        # read what the text area is now.
+        text = self.textedit.toPlainText()
+
+        # Text is now the new previous screen.
+        self.previous_screen = text
+
+        return response
 
     @asyncSlot()
     async def capture_image_async(self):
@@ -70,27 +109,30 @@ class MainWindow(QWidget):
         # e.g., save the current QImage to a file
 
         try:
-            ret, frame = cap.read()
+            frames = []
 
-            if ret:
-                encoded_frame = cv2.imencode('.jpg', frame)[1].tobytes()
+            # read ten frames
+            for i in range(10):
+                print("picture")
+                ret, frame = cap.read()
+                if ret:
+                    frames.append(cv2.imencode('.jpg', frame)[1].tobytes())
+                await asyncio.sleep(.5)  # Delay for 1 second
 
-                # Read the text from the textedit
-                text = self.textedit.toPlainText()
+            # Read the text from the textedit
+            text = self.textedit.toPlainText()
 
-                # Split the text into lines
-                lines = text.splitlines()
+            # Split the text into lines
+            lines = text.splitlines()
 
-                # Get the last line
-                last_line = lines[-1]
+            # Get the last line
+            last_line = lines[-1]
 
-                self.textedit.append("...")
-                # TODO make this async at some point
-                response = await sample_generate_text_image_content(last_line, encoded_frame)
+            response = await sample_generate_text_image_content(last_line, frames)
 
-                self.textedit.append(f"Gemini: {response}")
+            self.textedit.append(f"Gemini: {response}")
 
-                return response
+            return response
 
         except Exception as e:
             print(e)
